@@ -22,7 +22,7 @@ int main(int argc, char** argv)
 	SSL_load_error_strings();
 	SSL_library_init();
 
-	const char* fileName = argc > 1 ? argv[1] : "private_key.pem";
+	const char* fileName = argc > 1 ? argv[1] : "../key/private_key.pem";
 	const char* host = argc > 2 ? argv[2] : "";
 	unsigned int port = argc > 3 ? atoi(argv[3]) : 7496;
 	int clientId = 0;
