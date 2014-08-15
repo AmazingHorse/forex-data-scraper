@@ -8,41 +8,27 @@
 # include <unistd.h>
 #endif
 
-#include "ConnectionVerifyTest.h"
-#include <iostream>
-#include <openssl/ssl.h>
+#include <stdio.h>
+
+#include "PosixTestClient.h"
 
 const unsigned MAX_ATTEMPTS = 50;
 const unsigned SLEEP_TIME = 10;
 
 int main(int argc, char** argv)
 {
-
-	// initializing OpenSSL
-	SSL_load_error_strings();
-	SSL_library_init();
-
-	const char* fileName = argc > 1 ? argv[1] : "../key/private_key.pem";
-	const char* host = argc > 2 ? argv[2] : "";
-	unsigned int port = argc > 3 ? atoi(argv[3]) : 7496;
+	const char* host = argc > 1 ? argv[1] : "";
+	unsigned int port = 7496;
 	int clientId = 0;
 
-	const char* apiName = argc > 4 ? argv[4] : "TWSDemo";
-	const char* apiVersion = argc > 5 ? argv[5] : "1.0";
-
 	unsigned attempt = 0;
-	printf( "Start of Connection Verify Test %u\n", attempt);
-
-	ConnectionVerifyTest client (apiName, apiVersion);
-
-	if (!client.initPrivateKey(fileName)){
-		return 1;
-	}
+	printf( "Start of POSIX Socket Client Test %u\n", attempt);
 
 	for (;;) {
 		++attempt;
 		printf( "Attempt %u of %u\n", attempt, MAX_ATTEMPTS);
 
+		PosixTestClient client;
 
 		client.connect( host, port, clientId);
 
@@ -56,10 +42,8 @@ int main(int argc, char** argv)
 
 		printf( "Sleeping %u seconds before next attempt\n", SLEEP_TIME);
 		sleep( SLEEP_TIME);
-
 	}
 
-	printf ( "End of Connection Verify Test\n");
-	return 0;
+	printf ( "End of POSIX Socket Client Test\n");
 }
 
