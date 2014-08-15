@@ -31,7 +31,7 @@ int main(int argc, char** argv)
 		PosixTestClient client;
 
 		client.connect( host, port, clientId);
-
+        printf( "Connecting...");
 		while( client.isConnected()) {
 			client.processMessages();
 		}

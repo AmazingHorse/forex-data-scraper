@@ -58,14 +58,16 @@ bool PosixTestClient::isConnected() const
 
 void PosixTestClient::processMessages()
 {
+    // Initialize the file descriptor sets needed for select()
 	fd_set readSet, writeSet, errorSet;
 
+    // Get the current time and initialize a struct for it
 	struct timeval tval;
 	tval.tv_usec = 0;
 	tval.tv_sec = 0;
+    time_t now = time(NULL);
 
-	time_t now = time(NULL);
-
+    // Perform the required operation based on the state passed in
 	switch (m_state) {
 		case ST_PLACEORDER:
 			placeOrder();
@@ -98,19 +100,21 @@ void PosixTestClient::processMessages()
 		// initialize timeout with m_sleepDeadline - now
 		tval.tv_sec = m_sleepDeadline - now;
 	}
-
+    // If we have a valid socket client file descriptor
 	if( m_pClient->fd() >= 0 ) {
-
+        // Initialize the file descriptor sets
 		FD_ZERO( &readSet);
 		errorSet = writeSet = readSet;
-
+        // Add the client's file descriptor to readfds
 		FD_SET( m_pClient->fd(), &readSet);
-
-		if( !m_pClient->isOutBufferEmpty())
+        // If the output buffer of the socket client is not empty
+		if( !m_pClient->isOutBufferEmpty()) {
+            // Add the client's fd to writefds as well
 			FD_SET( m_pClient->fd(), &writeSet);
-
+        }
+        // Add the client's file descriptor to errorfds
 		FD_SET( m_pClient->fd(), &errorSet);
-
+        // Monitor the file descriptor for any events
 		int ret = select( m_pClient->fd() + 1, &readSet, &writeSet, &errorSet, &tval);
 
 		if( ret == 0) { // timeout
@@ -121,26 +125,26 @@ void PosixTestClient::processMessages()
 			disconnect();
 			return;
 		}
-
+        // fd error
 		if( m_pClient->fd() < 0)
 			return;
-
+        // if the socket's fd is still in the error set
 		if( FD_ISSET( m_pClient->fd(), &errorSet)) {
-			// error on socket
+            // error on socket
 			m_pClient->onError();
 		}
-
+        // if onError is called, eDisconnect sets the fd to -1, so exit
 		if( m_pClient->fd() < 0)
 			return;
-
+        // if the socket's fd is still in the write set
 		if( FD_ISSET( m_pClient->fd(), &writeSet)) {
 			// socket is ready for writing
 			m_pClient->onSend();
 		}
-
+        // if there is an error, eDisconnect sets the fd to -1, so exit
 		if( m_pClient->fd() < 0)
 			return;
-
+        //if the socket's fd is still in the read set
 		if( FD_ISSET( m_pClient->fd(), &readSet)) {
 			// socket is ready for reading
 			m_pClient->onReceive();
@@ -273,8 +277,11 @@ void PosixTestClient::updateMktDepthL2(TickerId id, int position, std::string ma
 void PosixTestClient::updateNewsBulletin(int msgId, int msgType, const std::string& newsMessage, const std::string& originExch) {}
 void PosixTestClient::managedAccounts( const std::string& accountsList) {}
 void PosixTestClient::receiveFA(faDataType pFaDataType, const std::string& cxml) {}
+
 void PosixTestClient::historicalData(TickerId reqId, const std::string& date, double open, double high,
-									  double low, double close, int volume, int barCount, double WAP, int hasGaps) {}
+									  double low, double close, int volume, int barCount, double WAP, int hasGaps) {
+    
+}
 void PosixTestClient::scannerParameters(const std::string& xml) {}
 void PosixTestClient::scannerData(int reqId, int rank, const ContractDetails& contractDetails,
 	   const std::string& distance, const std::string& benchmark, const std::string& projection,
