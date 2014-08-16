@@ -21,6 +21,7 @@ PosixTestClient::PosixTestClient()
 	, m_state(ST_CONNECT)
 	, m_sleepDeadline(0)
 	, m_orderId(0)
+    , ticker_id(0)
 {
 }
 
@@ -55,13 +56,13 @@ bool PosixTestClient::isConnected() const
 {
 	return m_pClient->isConnected();
 }
-
+// Accepts state, pointer to message, and pointer to id
 void PosixTestClient::processMessages()
 {
     // Initialize the file descriptor sets needed for select()
 	fd_set readSet, writeSet, errorSet;
 
-    // Get the current time and initialize a struct for it
+    // Get the current time and initialize a struct for select()
 	struct timeval tval;
 	tval.tv_usec = 0;
 	tval.tv_sec = 0;
@@ -215,11 +216,18 @@ void PosixTestClient::orderStatus( OrderId orderId, const std::string& status, i
 	}
 }
 
+void PosixTestClient::historicalData(const std::string& date, 
+        double open, double high, double low, double close, int volume, 
+        int barCount, double WAP, int hasGaps) {
+    // Perform some validation
+    // Request historical data from TWS socket
+    m_pClient->reqHistoricalData(++ticker_id, date, open, high, low, close, volume, 
+            barCount, WAP, hasGaps);    
+}
+
 void PosixTestClient::nextValidId( OrderId orderId)
 {
 	m_orderId = orderId;
-
-	m_state = ST_PLACEORDER;
 }
 
 void PosixTestClient::currentTime( long time)
@@ -269,7 +277,6 @@ void PosixTestClient::bondContractDetails( int reqId, const ContractDetails& con
 void PosixTestClient::contractDetailsEnd( int reqId) {}
 void PosixTestClient::execDetails( int reqId, const Contract& contract, const Execution& execution) {}
 void PosixTestClient::execDetailsEnd( int reqId) {}
-
 void PosixTestClient::updateMktDepth(TickerId id, int position, int operation, int side,
 									  double price, int size) {}
 void PosixTestClient::updateMktDepthL2(TickerId id, int position, std::string marketMaker, int operation,
@@ -277,11 +284,6 @@ void PosixTestClient::updateMktDepthL2(TickerId id, int position, std::string ma
 void PosixTestClient::updateNewsBulletin(int msgId, int msgType, const std::string& newsMessage, const std::string& originExch) {}
 void PosixTestClient::managedAccounts( const std::string& accountsList) {}
 void PosixTestClient::receiveFA(faDataType pFaDataType, const std::string& cxml) {}
-
-void PosixTestClient::historicalData(TickerId reqId, const std::string& date, double open, double high,
-									  double low, double close, int volume, int barCount, double WAP, int hasGaps) {
-    
-}
 void PosixTestClient::scannerParameters(const std::string& xml) {}
 void PosixTestClient::scannerData(int reqId, int rank, const ContractDetails& contractDetails,
 	   const std::string& distance, const std::string& benchmark, const std::string& projection,

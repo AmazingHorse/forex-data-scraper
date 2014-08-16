@@ -81,7 +81,7 @@ public:
 	void updateNewsBulletin(int msgId, int msgType, const std::string& newsMessage, const std::string& originExch);
 	void managedAccounts(const std::string& accountsList);
 	void receiveFA(faDataType pFaDataType, const std::string& cxml);
-	void historicalData(TickerId reqId, const std::string& date, double open, double high,
+	void historicalData(const std::string& date, double open, double high,
 		double low, double close, int volume, int barCount, double WAP, int hasGaps);
 	void scannerParameters(const std::string& xml);
 	void scannerData(int reqId, int rank, const ContractDetails& contractDetails,
@@ -112,6 +112,7 @@ private:
 	time_t m_sleepDeadline;
 
 	OrderId m_orderId;
+    TickerId ticker_id;
 };
 
 #endif
