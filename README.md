@@ -15,6 +15,8 @@ Requires:
 - a linux distro (or someone to port the makefile to windows!)
 - openssl
 - crypto
+- a neo4j database
+- tws
 
 Setup
 -----
